@@ -21,11 +21,12 @@ public class ThreadedSearch<T> implements Runnable {
     this.answer=answer;
   }
 
+
   /**
-  * Searches `list` in parallel using `numThreads` threads.
-  *
-  * You can assume that the list size is divisible by `numThreads`
-  */
+   * Searches `list` in parallel using `numThreads` threads.
+   *
+   * You can assume that the list size is divisible by `numThreads`
+   */
   public boolean parSearch(int numThreads, T target, ArrayList<T> list) throws InterruptedException {
     /*
     * First construct an instance of the `Answer` inner class. This will
@@ -47,7 +48,34 @@ public class ThreadedSearch<T> implements Runnable {
     * threads, wait for them to all terminate, and then return the answer
     * in the shared `Answer` instance.
     */
-    return false;
+    Answer ourAnswer = new Answer();
+    ourAnswer.setAnswer(false);
+    ThreadedSearch[] threadArray = new ThreadedSearch[numThreads];
+    int begin = 0;
+    int lastEnd = 0;
+    int end = 0;
+    int interval = list.size()/numThreads;
+
+    for (int i = 0; i < numThreads; ++i) {
+      begin = lastEnd;
+      end = begin + interval;
+      threadArray[i] = new ThreadedSearch(target,list,begin,end,ourAnswer);
+      threadArray[i].start();
+      lastEnd = end;
+    }
+
+	/*for(int i =0; i < numThreads; i++){
+		threadArray[i].join();
+	}*/
+    return ourAnswer.getAnswer();
+  }
+
+  private void start() {
+    for(int i=begin; i<end; i++){
+      if(list.get(i).equals(target)) {
+        answer.setAnswer(true);
+      }
+    }
   }
 
   public void run() {
